@@ -11,57 +11,57 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v4
-      with:
-        java-version: '11'
-        distribution: 'temurin'
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
 
-    # Install Chrome (browser-actions action)
-    - name: Install Chrome
-      uses: browser-actions/setup-chrome@latest
+      # Install Chrome stable (biar bukan versi dev 140)
+      - name: Install Chrome (stable)
+        uses: browser-actions/setup-chrome@latest
+        with:
+          chrome-version: stable
 
-    # Install ChromeDriver yang sesuai versi Chrome
-    - name: Install ChromeDriver
-      run: |
-        CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome //;s/ .*//')
-        echo "Installed Chrome version: $CHROME_VERSION"
+      # Install ChromeDriver sesuai versi Chrome
+      - name: Install ChromeDriver
+        run: |
+          CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome //;s/ .*//')
+          CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1)
+          echo "Installed Chrome version: $CHROME_VERSION"
+          echo "Chrome major version: $CHROME_MAJOR"
 
-        # Ambil major version (contoh: 140.0.7339.0 → 140)
-        CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1)
-        echo "Chrome major version: $CHROME_MAJOR"
+          DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_MAJOR")
+          echo "Matching ChromeDriver version: $DRIVER_VERSION"
 
-        # Download ChromeDriver versi yang cocok
-        DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR}")
-        echo "Matching ChromeDriver version: $DRIVER_VERSION"
+          curl -Lo chromedriver.zip "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+          unzip chromedriver.zip -d /usr/local/bin/
+          rm chromedriver.zip
+          chmod +x /usr/local/bin/chromedriver
+          chromedriver --version
 
-        wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
-        unzip chromedriver_linux64.zip
-        sudo mv chromedriver /usr/local/bin/
-        chromedriver --version
+      - name: Grant execute permission for Gradlew
+        run: chmod +x gradlew
 
-    - name: Grant execute permission for Gradlew
-      run: chmod +x gradlew
+      - name: Run Tests
+        run: ./gradlew test
 
-    - name: Run Tests
-      run: ./gradlew test
+      - name: Show build folder structure
+        run: |
+          echo "===== BUILD FOLDER STRUCTURE ====="
+          find build -type f
 
-    - name: Show build folder structure
-      run: |
-        echo "===== BUILD FOLDER STRUCTURE ====="
-        find build -type f
+      - name: Upload JUnit Test Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: junit-report
+          path: build/reports/tests/test
 
-    - name: Upload JUnit Test Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: junit-report
-        path: build/reports/tests/test
-
-    - name: Upload Cucumber HTML Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: cucumber-report
-        path: build/cucumber-reports
+      - name: Upload Cucumber HTML Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: cucumber-report
+          path: build/reports/cucumber
