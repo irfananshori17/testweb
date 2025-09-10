@@ -42,11 +42,12 @@ jobs:
     - name: Upload JUnit Test Report
       uses: actions/upload-artifact@v4
       with:
-        name: junit-report
-        path: build/test-results/test
+        name: junit-test-results
+        path: build/test-results/test/**
 
     - name: Upload HTML Test Report
       uses: actions/upload-artifact@v4
       with:
         name: html-test-report
-        path: build/reports/tests/test
+        path: build/reports/tests/test/**
+
