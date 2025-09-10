@@ -1,4 +1,4 @@
-name: UI Test
+name: test
 
 on:
   push:
@@ -11,55 +11,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Set up JDK 11
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '11'
+    - name: Set up JDK 11
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+    - name: Cache Gradle packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle
 
-      - name: Install Chrome (stable)
-        uses: browser-actions/setup-chrome@latest
-        with:
-          chrome-version: 139.0.6265.0
+    - name: Install Chrome (latest stable)
+      uses: browser-actions/setup-chrome@latest
 
-      - name: Install ChromeDriver
-        uses: nanasess/setup-chromedriver@master
-        with:
-          chromedriver-version: 139.0.6265.0
+    - name: Install matching ChromeDriver
+      run: |
+        CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome //')
+        CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1)
+        echo "Installed Chrome version: $CHROME_VERSION"
+        wget https://storage.googleapis.com/chrome-for-testing-public/$CHROME_VERSION/linux64/chromedriver-linux64.zip -O chromedriver.zip
+        unzip chromedriver.zip
+        sudo mv chromedriver-linux64/chromedriver /usr/local/bin/
+        chromedriver --version
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
 
-      - name: Run Tests
-        run: ./gradlew test
+    - name: Run Tests
+      run: ./gradlew clean test
 
-      - name: Show build folder structure
-        if: always()
-        run: ls -R build || true
-
-      - name: Upload JUnit Test Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: junit-report
-          path: build/reports/tests/test
-
-      - name: Upload Cucumber HTML Report
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cucumber-report
-          path: build/reports/cucumber
+    - name: Upload JUnit Test Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: junit-report
+        path: build/test-results/test
