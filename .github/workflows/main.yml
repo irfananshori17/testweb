@@ -20,11 +20,27 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
 
-    - name: Install Chrome & ChromeDriver
+    # Install Chrome (browser-actions action)
+    - name: Install Chrome
+      uses: browser-actions/setup-chrome@latest
+
+    # Install ChromeDriver yang sesuai versi Chrome
+    - name: Install ChromeDriver
       run: |
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable chromium-chromedriver
-        google-chrome --version
+        CHROME_VERSION=$(google-chrome --version | sed 's/Google Chrome //;s/ .*//')
+        echo "Installed Chrome version: $CHROME_VERSION"
+
+        # Ambil major version (contoh: 140.0.7339.0 → 140)
+        CHROME_MAJOR=$(echo $CHROME_VERSION | cut -d. -f1)
+        echo "Chrome major version: $CHROME_MAJOR"
+
+        # Download ChromeDriver versi yang cocok
+        DRIVER_VERSION=$(curl -s "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_MAJOR}")
+        echo "Matching ChromeDriver version: $DRIVER_VERSION"
+
+        wget -q "https://chromedriver.storage.googleapis.com/${DRIVER_VERSION}/chromedriver_linux64.zip"
+        unzip chromedriver_linux64.zip
+        sudo mv chromedriver /usr/local/bin/
         chromedriver --version
 
     - name: Grant execute permission for Gradlew
