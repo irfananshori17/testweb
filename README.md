@@ -1,4 +1,4 @@
-# UI Test Automation Framework
+UI Test Automation Framework
 
 Framework otomatisasi pengujian **UI Web** menggunakan:
 - **Java JDK 11.0.22**
@@ -7,9 +7,9 @@ Framework otomatisasi pengujian **UI Web** menggunakan:
 - **Selenium 4.13.0**
 - **JUnit 4.13.2**
 
-# Deskripsi
+Deskripsi
 Framework ini digunakan untuk menguji tampilan dan fungsi website secara otomatis.  
 Menggunakan pendekatan **BDD (Behavior Driven Development)** dengan **Cucumber**, ditulis dalam Java, dan dikelola menggunakan Gradle.  
 Page Object Model (POM) digunakan agar kode lebih rapi, terstruktur, dan mudah dirawat.
 
-Website yang diuji: [https://www.saucedemo.com/](https://www.saucedemo.com/)"# webtesting" 
+Website yang diuji: [https://www.saucedemo.com/](https://www.saucedemo.com/)  
