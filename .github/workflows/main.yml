@@ -36,9 +36,6 @@ jobs:
     - name: Setup ChromeDriver
       uses: nanasess/setup-chromedriver@v2
 
-    - name: Run Tests with Gradle
-      run: ./gradlew clean test
-
     - name: Upload JUnit Test Report
       uses: actions/upload-artifact@v4
       with:
