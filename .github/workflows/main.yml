@@ -30,16 +30,14 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
-    - name: Setup ChromeDriver
-      uses: nanasess/setup-chromedriver@v2
-      with:
-        chromedriver-version: 'latest'
-
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
 
-    - name: Run Tests
-      run: ./gradlew test
+    - name: Setup ChromeDriver
+      uses: nanasess/setup-chromedriver@v2
+
+    - name: Run Tests with Gradle
+      run: ./gradlew clean test
 
     - name: Upload JUnit Test Report
       uses: actions/upload-artifact@v4
